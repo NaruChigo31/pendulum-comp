@@ -18,7 +18,7 @@ def f_non(theta, omega, t):
     return -np.sin(theta)-k*omega+A*np.cos(phi*t) #assumed g/L=1
 
 
-def euler(theta,omega,t,dt,func):
+def trapezoid(theta,omega,t,dt,func):
     dtheta1 = dt * omega
     domega1 = dt * func(theta, omega, t)
     dtheta2 = dt * (omega + domega1)
@@ -53,8 +53,8 @@ def data_evalulation(thetaIn, omegaIn):
 
     for i in range(1000):
 
-        theta_lin, omega_lin = euler(theta_lin,omega_lin,t,dt,f_lin)
-        theta_non, omega_non = euler(theta_non, omega_non,t,dt,f_lin)
+        theta_lin, omega_lin = trapezoid(theta_lin,omega_lin,t,dt,f_lin)
+        theta_non, omega_non = trapezoid(theta_non, omega_non,t,dt,f_non)
 
         theta_lin_list.append(theta_lin)
         omega_lin_list.append(omega_lin)
@@ -72,40 +72,30 @@ def data_evalulation(thetaIn, omegaIn):
     return theta_lin_list, omega_lin_list, theta_non_list, omega_non_list, nsteps_list, t_list
 
 
-fig_1 = data_evalulation(0.2,0)
-fig_2 = data_evalulation(1,0)
-fig_3 = data_evalulation(3.14,0)
-fig_4 = data_evalulation(0,1)
+# fig_1 = data_evalulation(0.2,0)
+# fig_2 = data_evalulation(1,0)
+# fig_3 = data_evalulation(3.14,0)
+# fig_4 = data_evalulation(0,1)
 
-fig, ax = plt.subplots(2, 2)
+# fig, ax = plt.subplots(2, 2)
 
-ax[0, 0].plot(fig_1[5], fig_1[0], label="Theta/steps")
-ax[0, 0].plot(fig_1[5], fig_1[2], label="Theta/steps")
-ax[0, 0].plot(fig_1[4], fig_1[1], label="Omega/steps")
-ax[0, 0].set_title("Figure 1: Initial Conditions (0.2, 0)")
-ax[0, 0].axis([0, 500, -np.pi, np.pi])
+fig, ax = plt.subplots(4, 2, figsize=(8, 12))
 
-ax[0, 1].plot(fig_2[5], fig_2[0], label="Theta/steps")
-ax[0, 1].plot(fig_2[5], fig_2[2], label="Theta/steps")
-ax[0, 1].plot(fig_2[4], fig_2[1], label="Omega/steps")
-ax[0, 1].set_title("Figure 2: Initial Conditions (1, 0)")
-ax[0, 1].axis([0, 500, -np.pi, np.pi])
+conditions = [(0.2, 0), (1, 0), (3.14, 0), (0, 1)]
 
-ax[1, 0].plot(fig_3[5], fig_3[0], label="Theta/steps")
-ax[1, 0].plot(fig_3[5], fig_3[2], label="Theta/steps")
-ax[1, 0].plot(fig_3[4], fig_3[1], label="Omega/steps")
-ax[1, 0].set_title("Figure 3: Initial Conditions (3.14, 0)")
-ax[1, 0].axis([0, 500, -np.pi, np.pi])
+for row, (theta0, omega0) in enumerate(conditions):
+    th_l, om_l, th_n, om_n, steps, t = data_evalulation(theta0, omega0)
 
-ax[1, 1].plot(fig_4[5], fig_4[0], label="Theta/steps")
-ax[1, 1].plot(fig_4[5], fig_4[2], label="Theta/steps")
-ax[1, 1].plot(fig_4[4], fig_4[1], label="Omega/steps")
-ax[1, 1].set_title("Figure 4: Initial Conditions (0, 1)")
-ax[1, 1].axis([0, 500, -np.pi, np.pi])
+    for col, (lin, non, ylabel) in enumerate([(th_l, th_n, "theta"), (om_l, om_n, "omega")]):
+        a = ax[row, col]
+        a.plot(t, lin, label="Linear")
+        a.plot(t, non, label="Nonlinear")
+        a.plot([], [], ' ', label=rf"$\theta(0)$={theta0}")
+        a.plot([], [], ' ', label=rf"$\omega(0)$={omega0}")
+        a.set_xlabel("t")
+        a.set_ylabel(ylabel)
+        a.legend(loc="upper right")
 
 plt.tight_layout()
-plt.show()
-plt.axis([0, 500, -np.pi, np.pi])
-plt.title(rf"$\theta$ and $\omega$ over steps")
-plt.savefig(f'ex2_0-{omegaIn}_w-{thetaIn}.png')
+plt.savefig("ex2_all.png")
 plt.show()

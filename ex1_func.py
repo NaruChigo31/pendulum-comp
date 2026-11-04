@@ -14,7 +14,7 @@ phi = 0.66667
 def f(theta, omega, t):
     return -theta-k*omega+A*np.cos(phi*t) #assumed g/L=1
 
-def create_plot(thetaIn, omegaIn):
+def create_plot(ax, thetaIn, omegaIn):
 
     theta = thetaIn
     omega = omegaIn
@@ -24,7 +24,7 @@ def create_plot(thetaIn, omegaIn):
 
     theta_list = [theta]
     omega_list = [omega]
-    nsteps_list = [nsteps] # np.arange(0, 1000)
+    nsteps_list = [nsteps]
 
     for i in range(1000):
         dtheta1 = dt * omega
@@ -42,16 +42,23 @@ def create_plot(thetaIn, omegaIn):
         omega_list.append(omega)
         nsteps_list.append(nsteps)
 
-    # plt.plot(nsteps_list, 0.0 * np.array(nsteps_list))
-    plt.plot(nsteps_list, theta_list, label="Theta/steps")
-    plt.plot(nsteps_list, omega_list, label="Omega/steps")
-    plt.axis([0, 500, -np.pi, np.pi])
-    plt.title(rf"$\theta$ and $\omega$ over steps")
-    plt.savefig(f'ex1_0-{omegaIn}_w-{thetaIn}.png')
-    plt.show()
+    ax.plot(nsteps_list, theta_list, label=r"$\theta$")
+    ax.plot(nsteps_list, omega_list, label=r"$\omega$")
+    ax.plot([], [], ' ', label=rf"$\theta(0)$={thetaIn}, $\omega(0)$={omegaIn}")
+    ax.axis([0, 500, -np.pi, np.pi])
+    ax.set_xlabel("nsteps")
+    ax.set_ylabel(r"$\theta$, $\omega$")
+    ax.legend(loc="upper right")
 
 
-create_plot(0.2,0)
-create_plot(1,0)
-create_plot(3.14,0)
-create_plot(0,1)
+fig, ax = plt.subplots(2, 2, figsize=(8, 6))
+
+create_plot(ax[0, 0], 0.2, 0)
+create_plot(ax[0, 1], 1, 0)
+create_plot(ax[1, 0], 3.14, 0)
+create_plot(ax[1, 1], 0, 1)
+
+fig.suptitle(r"Linear pendulum: $\theta$ and $\omega$ over steps")
+plt.tight_layout()
+plt.savefig("ex1_all.png")
+plt.show()
